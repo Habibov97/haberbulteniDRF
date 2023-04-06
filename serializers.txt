@@ -1,0 +1,62 @@
+Haberbulteni : shell plus ile serialize (obyekti json fayla kecirmek)
+
+pip install ipython , django , django-extensions , djangorestframework
+----------------------------------------------------------------
+
+terminal:  py manage.py shell_plus
+
+1.  from news.models import Makale                          --(news papkasindan 'Makale' ismindeki modeli cekmek )
+2.  from news.api.serializers import MakaleSerializer       --(news>>api>>serializers.py faylindan 'MakaleSerializer' modelini cekmek)  
+
+3.  makale_instance = Makale.objects.first()               --(Makale modelinde yatardigimiz ilk obyekti aliriq)
+
+4.  serializer = MakaleSerializer(makale_instance)         --(Ve hemin obyekti 'MakaleSerializer' icine add edirik) 
+
+5.  serializer.data                              --(dediyimizde bize json 'benzeri' bir data verecekdir)
+
+-- Bizim tam olaraq json fayl almagimiz ucun : --
+
+6.  from rest_framework.renderers import JSONRenderer
+
+7. data = JSONRenderer().render(serializer.data)
+
+-- Artiq obyektimizdeki informasiyani json fayla cevirdik buna 'data' yazib baxa bilerik, data bize byte formatinda gelir -- 
+
+8. data 
+
+
+-----------------------------------------------------------------------------------------------------------------
+
+Haberbulteni : shell plus ile deserialize ( json fayli obyekte kecirmek)
+
+pip install ipython , django , django-extensions , djangorestframework
+----------------------------------------------------------------
+
+terminal:  py manage.py shell_plus
+
+1.  import  io 
+2.  from rest_framework.parsers  import JSONParser
+
+-- datamiz byte (json) formatinda oldugu ucun ilk once onu stream e cevirmek lazimdir (object e) --
+
+3.  stream = io.BytesIO(data)
+
+4.  stream >> (outputu bele olur) >> ''<_io.BytesIO at 0x2a9fad9fc40>''
+
+5.  data = JSONParser().parse(stream)
+
+-- Artiq datamiz dict formatinda pythonun oxuyacagi bir sekildedir ve onu obyekte cevirmek lazimdir. Birinci serializeri cekirik--
+
+6.  serializer = MakaleSerializer(data=data)
+
+7.  serializer                          -- bize terminalda 'MakaleSerializer' modelleri gelir baxa bilerik --
+
+-- Indi biz movcud serializerimizden istifade edib save etmeyimiz lazimdir --
+
+8.  serializer.is_valid               -- en onemli datamizin valid olub olmadigini yoxlamaliyiq. Bizim yaratdigimiz 'MakaleSerializer' modelinin icinde 'create' deye funcda tanimladiq ve elaqelendirdik yeni sistemimiz arxa planda datamizin oldugunu bilir. Biz ise yoxladiqda bize 'TRUE' cavabi gelir. --
+
+9.  serializer.validated_data     -- yazdigimizda jsondan aldigimiz datanin serializerde yaradilmis formasini aliriq --
+
+10. serializer.save()           -- save dedikde artiq obyektimizi almis oluruq
+
+
